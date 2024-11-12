@@ -80,6 +80,7 @@ public class RegisterOpenMRSPayload {
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, jsonUser.toString());
+        String bodyString =body.toString();
         Request request = new Request.Builder()
                 .url(url + "user")
                 .method("POST", body)
@@ -90,6 +91,7 @@ public class RegisterOpenMRSPayload {
 
        // System.out.println("Response ndo hii " + jsonUser.toString());
         System.out.println("Response ndo hii " + response);
+        System.out.println("Response Payload " + jsonUser.toString());
         amrsUsers.setMigrated(1);
         amrsUsers.setResponse_code(response.code());
         amrsUserServices.save(amrsUsers);
@@ -193,7 +195,7 @@ public class RegisterOpenMRSPayload {
         Response response = client.newCall(request).execute();
 
         // System.out.println("Response ndo hii " + jsonUser.toString());
-        System.out.println("Response ndo hii " + response.request());
+        System.out.println("Response ndo hii " + response.request()+" More message "+ response.message());
         amrsPatients.setMigrated(1);
         amrsPatients.setResponse_code(response.code());
         //amrsPatients.setKenyaemrpatientUUID();

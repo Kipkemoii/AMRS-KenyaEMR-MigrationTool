@@ -8,6 +8,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY 'Ampath@2024';
 CREATE USER 'kenyaemr'@'%' IDENTIFIED BY 'Ampath@2024';
 GRANT ALL PRIVILEGES ON my_database.* TO 'kenyaemr'@'%';
 FLUSH PRIVILEGES;
+
 Exit
 
 #- Installing JDK 11

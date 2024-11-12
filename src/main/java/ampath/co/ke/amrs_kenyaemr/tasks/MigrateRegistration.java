@@ -47,9 +47,9 @@ public class MigrateRegistration {
                 "inner join amrs.person p on p.person_id=u.person_id\n" +
                 "inner join amrs.person_name pn on pn.person_id=p.person_id\n" +
                 "inner join amrs.person_address pa on pa.person_id=p.person_id\n" +
-                "where location_id in ("+ locations+") \n" +
+                "where location_id in ('"+ locations+"') \n" +
                 "group by u.user_id\n" +
-                "order by u.username asc limit 10");
+                "order by u.username asc limit 25");
         rs.last();
         x = rs.getRow();
         rs.beforeFirst();
@@ -82,7 +82,7 @@ public class MigrateRegistration {
 
 
             }
-con.close();
+//con.close();
         }
     }
     //Patients
@@ -111,7 +111,7 @@ con.close();
                 "inner join amrs.person_name pn on pn.person_id=p.person_id\n" +
                 "inner join amrs.person_address pa on pa.person_id=p.person_id\n" +
                 "inner join amrs.location l on e.location_id=l.location_id\n" +
-                "where e.location_id in ("+ locations +") and e.patient_id<1098247 \n" +
+                "where e.location_id in ('"+ locations +"') and e.patient_id<1098247 \n" +
                 "group by pt.patient_id\n" +
                 "order by e.patient_id desc";
         System.out.println("locations " + locations + " parentUUID " + parentUUID);

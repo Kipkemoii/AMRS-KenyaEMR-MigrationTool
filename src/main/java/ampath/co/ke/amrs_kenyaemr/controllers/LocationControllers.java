@@ -52,7 +52,8 @@ public class LocationControllers {
     public ModelAndView Locations(){
       //  System.out.println("url " + server + " pass " + username + "Password " + password);
         ModelAndView modelAndView = new ModelAndView();
-        int x = locationsService.getParents().size();
+        List<AMRSLocations> locationsList = locationsService.getAll();
+        /*int x = locationsService.getParents().size();
         List<?> listLocations = locationsService.getParents();
         List<AMRSLocations> amrsLocationsList = new ArrayList<>();
         for(int y=0;y<x;y++){
@@ -62,12 +63,12 @@ public class LocationControllers {
            amrsLocationsList.add(amrsLocations.get(0));
 
             String uuid = listLocations.get(y).toString();
-       //     System.out.println("Locations uuid "+ uuid);
+          System.out.println("Locations uuid "+ uuid);
         }
+        */
 
-       modelAndView.addObject("parents",amrsLocationsList);
-       // modelAndView.addObject("dataelementgroup",dataElementGroupsService.getAllDatasetByStatus("1"));
-       // modelAndView.addObject("dataset",datasetService.getAllDatasetBystatus("1"));
+        System.out.println("Locations Sizes "+ locationsList.size());
+       modelAndView.addObject("parents",locationsList);
         modelAndView.setViewName("index");
         return modelAndView;
 
@@ -127,12 +128,12 @@ public class LocationControllers {
                           @PathVariable(name = "puuid") String parentUuid) throws SQLException, JSONException, ParseException, IOException {
 
         //System Users default password to super users
-        //MigrateRegistration.users(server,username,password,locationId,parentUuid, amrsUserServices,OpenMRSURL,auth);
+       // MigrateRegistration.users(server,username,password,locationId,parentUuid, amrsUserServices,OpenMRSURL,auth);
         //Patient Registration & identifiers
-        MigrateRegistration.patients(server,username,password,locationId,parentUuid,amrsPatientServices,amrsIdentifiersService,OpenMRSURL,auth);
+         MigrateRegistration.patients(server,username,password,locationId,parentUuid,amrsPatientServices,amrsIdentifiersService,OpenMRSURL,auth);
         //Relationships
         //Programs
-        MigrateCareData.programs(server,username,password,locationId,parentUuid,amrsProgramService,amrsPatientServices,OpenMRSURL,auth);
+        //MigrateCareData.programs(server,username,password,locationId,parentUuid,amrsProgramService,amrsPatientServices,OpenMRSURL,auth);
 
         System.out.println("AMRS Locations "+locationId);
 

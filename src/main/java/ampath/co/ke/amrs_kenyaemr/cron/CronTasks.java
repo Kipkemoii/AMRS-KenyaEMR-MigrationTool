@@ -116,6 +116,9 @@ public class CronTasks {
   @Autowired
   private AMRSEacService amrsEacService;
 
+  @Autowired
+  private AMRSDepressionScreeningService amrsDepressionScreeningService;
+
   @Value("${mapping.endpoint:http://localhost:8082/mappings/concepts}")
   private String mappingEndpoint;
   private final RestTemplate restTemplate = new RestTemplate();
@@ -441,6 +444,19 @@ public class CronTasks {
         AMRSLocation amrsLocation = new AMRSLocation();
         String KenyaEMRlocationUuid = amrsLocation.getKenyaEMRLocationUuid();
         MigrateCareData.processEac(server, username, password, KenyaEMRlocationUuid, amrsEacService, amrsPatientServices, amrsTranslater, OpenMRSURL, auth);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    });
+  }
+
+  //@Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+  public void processDepressionScreening() throws JSONException, ParseException, SQLException, IOException {
+    CompletableFuture.runAsync(() -> {
+      try {
+        AMRSLocation amrsLocation = new AMRSLocation();
+        String KenyaEMRlocationUuid = amrsLocation.getKenyaEMRLocationUuid();
+        MigrateCareData.processDepressionScreening(server, username, password, KenyaEMRlocationUuid, amrsDepressionScreeningService, amrsPatientServices, amrsTranslater, OpenMRSURL, auth);
       } catch (Exception e) {
         e.printStackTrace();
       }

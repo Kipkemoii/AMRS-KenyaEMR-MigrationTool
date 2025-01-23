@@ -5270,6 +5270,119 @@ public class MigrateCareData {
     CareOpenMRSPayload.processEac(amrsEacService, amrsPatientServices, amrsTranslater, KenyaEMRlocationUuid, url, auth);
   }
 
+  public static void processDepressionScreening(String server, String username, String password,  String KenyaEMRlocationUuid, AMRSDepressionScreeningService amrsDepressionScreeningService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws SQLException, JSONException, ParseException, IOException {
+
+    String samplePatientList = AMRSSamples.getPersonIdList();
+
+
+    String sql = "SELECT \n" +
+            "    o.person_id AS patient_id,\n" +
+            "    e.form_id,\n" +
+            "    e.visit_id,\n" +
+            "    o.concept_id,\n" +
+            "    o.encounter_id,\n" +
+            "    o.obs_datetime,\n" +
+            "    e.encounter_datetime,\n" +
+            "    cn.name question,\n" +
+            "    c.datatype_id,\n" +
+            "    CASE\n" +
+            "        WHEN o.value_datetime IS NOT NULL THEN o.value_datetime\n" +
+            "        WHEN o.value_coded IS NOT NULL THEN o.value_coded\n" +
+            "        WHEN o.value_numeric IS NOT NULL THEN o.value_numeric\n" +
+            "        WHEN o.value_text IS NOT NULL THEN o.value_text\n" +
+            "    END AS value,\n" +
+            "    CASE\n" +
+            "        WHEN o.concept_id = 7806 AND o.value_numeric = 0 THEN \"163733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7806 AND o.value_numeric = 1 THEN \"163734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7806 AND o.value_numeric = 2 THEN \"163735AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7806 AND o.value_numeric = 3 THEN \"163736AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        -- feeling down, depressed \n" +
+            "\t\tWHEN o.concept_id = 7807 AND o.value_numeric = 0 THEN \"163733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7807 AND o.value_numeric = 1 THEN \"163734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7807 AND o.value_numeric = 2 THEN \"163735AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        WHEN o.concept_id = 7807 AND o.value_numeric = 3 THEN \"163736AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "        \n" +
+            "        -- depression assessment score translation based on phq-9 score rating\n" +
+            "\t\tWHEN o.concept_id = 7815 AND (o.value_numeric >= 0 AND o.value_numeric <= 4) THEN \"1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "\t\tWHEN o.concept_id = 7815 AND (o.value_numeric >= 5 AND o.value_numeric <= 9) THEN \"157790AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "\t\tWHEN o.concept_id = 7815 AND (o.value_numeric >= 10 AND o.value_numeric <= 14) THEN \"134011AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "\t\tWHEN o.concept_id = 7815 AND (o.value_numeric >= 15 AND o.value_numeric <= 19) THEN \"134017AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "\t\tWHEN o.concept_id = 7815 AND (o.value_numeric >= 20 AND o.value_numeric <= 27) THEN \"126627AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\n" +
+            "\t\tELSE NULL\n" +
+            "    END AS \"kenyaemr_value\",\n" +
+            "    CASE\n" +
+            "        WHEN o.concept_id = 7815 THEN \"33bb96f8-e009-482a-ba68-212281780fb8\"\n" +
+            "    END AS \"kenyaemr_concept_uuid\"\n" +
+            "FROM\n" +
+            "    amrs.obs o\n" +
+            "        INNER JOIN\n" +
+            "    amrs.concept c ON o.concept_id = c.concept_id\n" +
+            "        INNER JOIN\n" +
+            "    amrs.concept_name cn ON o.concept_id = cn.concept_id\n" +
+            "        AND cn.locale_preferred = 1\n" +
+            "       --  AND o.person_id IN (7315, 59807, 183479, 1072350, 827082 )\n" +
+            "      AND o.person_id in (" + samplePatientList + ")\n" +
+            "        AND c.concept_id IN (7815, 7806, 7807)\n" +
+            "        INNER JOIN\n" +
+            "    amrs.encounter e ON o.encounter_id = e.encounter_id\n" +
+            "        AND e.voided = 0\n" +
+            "        AND o.voided = 0\n" +
+            "        AND e.encounter_type IN (275)\n" +
+            "ORDER BY patient_id ASC , encounter_id DESC";
+
+
+    Connection con = DriverManager.getConnection(server, username, password);
+    int x = 0;
+    Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+            ResultSet.CONCUR_READ_ONLY);
+    ResultSet rs = stmt.executeQuery(sql);
+    rs.last();
+    x = rs.getRow();
+    rs.beforeFirst();
+    while (rs.next()) {
+
+      String patientId = rs.getString("patient_id");
+      String formId = rs.getString("form_id");
+      String conceptId = rs.getString("concept_id");
+      String encounterId = rs.getString("encounter_id");
+      String encounterDatetime = rs.getString("encounter_datetime");
+      String value = rs.getString("value");
+      String question = rs.getString("question");
+      String dataType = rs.getString("datatype_id");
+      String visitId = rs.getString("visit_id");
+      String obsDateTime = rs.getString("obs_datetime");
+      String kenyaemrValue = rs.getString("kenyaemr_value");
+      String kenyaemrConceptUuid = rs.getString("kenyaemr_concept_uuid");
+
+      // Check if record already exists
+      List<AMRSDepressionScreening> existingRecords = amrsDepressionScreeningService.findByEncounterConceptAndPatient(encounterId, conceptId, patientId);
+      if (!existingRecords.isEmpty()) {
+        System.out.println("Duplicate record found for encounterId: " + encounterId + ", conceptId: " + conceptId + ", patientId: " + patientId);
+        continue; // Skip saving to avoid duplication
+      }
+
+      AMRSDepressionScreening amrsDepressionScreening = new AMRSDepressionScreening();
+      String kenyaemr_patient_uuid = amrsTranslater.KenyaemrPatientUuid(patientId);
+
+      amrsDepressionScreening.setPatientId(patientId);
+      amrsDepressionScreening.setFormId(formId);
+      amrsDepressionScreening.setConceptId(conceptId);
+      amrsDepressionScreening.setEncounterId(encounterId);
+      amrsDepressionScreening.setValue(value);
+      amrsDepressionScreening.setConceptDataTypeId(dataType);
+      amrsDepressionScreening.setVisitId(visitId);
+      amrsDepressionScreening.setQuestion(question);
+      amrsDepressionScreening.setObsDateTime(obsDateTime);
+      amrsDepressionScreening.setKenyaemrEncounterTypeUuid("f091b067-bea5-4657-8445-cfec05dc46a2");
+      amrsDepressionScreening.setKenyaemrFormUuid("03767614-1384-4ce3-aea9-27e2f4e67d01");
+      amrsDepressionScreening.setKenyaEmrValue(kenyaemrValue);
+      amrsDepressionScreening.setKenyaEmrEncounterDateTime(encounterDatetime);
+      amrsDepressionScreening.setKenyaEmrConceptUuid(kenyaemrConceptUuid);
+      amrsDepressionScreening.setKenyaemrPatientUuid(kenyaemr_patient_uuid);
+      amrsDepressionScreeningService.save(amrsDepressionScreening);
+    }
+    DepressionScreening.processDepressionScreening(amrsDepressionScreeningService, amrsPatientServices, amrsTranslater, url, auth);
+  }
 
 }
 

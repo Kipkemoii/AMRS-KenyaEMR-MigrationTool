@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class TBPayload {
-    public static void processTBScreening(AMRSTbScreeningService amrsTbScreeningService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws JSONException, IOException {
+    public static void processTBScreening(AMRSTbScreeningService amrsTbScreeningService, AMRSTranslater amrsTranslater, String KenyaEMRlocationUuid, String url, String auth) throws JSONException, IOException {
         List<AMRSTbScreening> amrsTbScreenings = amrsTbScreeningService.findByResponseCodeIsNull();
         if (amrsTbScreenings.size() > 0) {
             // Use a Set to store unique encounter IDs
@@ -57,7 +57,7 @@ public class TBPayload {
                     jsonObservation.put("concept", amrsTbScreeningEncounters.get(x).getKenyaEmrConceptUuid());
                     jsonObservation.put("obsDatetime", obsDatetime);
                     jsonObservation.put("value", value);
-                    jsonObservation.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                    jsonObservation.put("location", KenyaEMRlocationUuid);
                     jsonObservations.put(jsonObservation);
 
                     patientuuid = amrsTranslater.KenyaemrPatientUuid(amrsTbScreeningEncounters.get(x).getPatientId());
@@ -74,7 +74,7 @@ public class TBPayload {
                 jsonObservationEntry.put("person", patientuuid);
                 jsonObservationEntry.put("concept", "1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 jsonObservationEntry.put("value", "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                jsonObservationEntry.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonObservationEntry.put("location", KenyaEMRlocationUuid);
                 jsonObservationEntry.put("obsDatetime", obsDatetime);
                 jsonObservations.put(jsonObservationEntry);
 
@@ -83,7 +83,7 @@ public class TBPayload {
                 jsonObservationFever.put("person", patientuuid);
                 jsonObservationFever.put("concept", "1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 jsonObservationFever.put("value", "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                jsonObservationFever.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonObservationFever.put("location", KenyaEMRlocationUuid);
                 jsonObservationFever.put("obsDatetime", obsDatetime);
                 jsonObservations.put(jsonObservationFever);
 
@@ -92,7 +92,7 @@ public class TBPayload {
                 jsonObservationWeightLoss.put("person", patientuuid);
                 jsonObservationWeightLoss.put("concept", "1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 jsonObservationWeightLoss.put("value", "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                jsonObservationWeightLoss.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonObservationWeightLoss.put("location", KenyaEMRlocationUuid);
                 jsonObservationWeightLoss.put("obsDatetime", obsDatetime);
                 jsonObservations.put(jsonObservationWeightLoss);
 
@@ -101,7 +101,7 @@ public class TBPayload {
                 jsonObservationNightSweats.put("person", patientuuid);
                 jsonObservationNightSweats.put("concept", "1729AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 jsonObservationNightSweats.put("value", "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                jsonObservationNightSweats.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonObservationNightSweats.put("location", KenyaEMRlocationUuid);
                 jsonObservationNightSweats.put("obsDatetime", obsDatetime);
                 jsonObservations.put(jsonObservationNightSweats);
 
@@ -113,7 +113,7 @@ public class TBPayload {
                     jsonEncounter.put("patient", patientuuid);
                     jsonEncounter.put("encounterDatetime", encounterDatetime);
                     jsonEncounter.put("encounterType", encounteruuid);
-                    jsonEncounter.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                    jsonEncounter.put("location", KenyaEMRlocationUuid);
                     jsonEncounter.put("visit", visituuid);
                     jsonEncounter.put("obs", jsonObservations);
                     System.out.println("Payload for is here " + jsonEncounter.toString());
@@ -141,6 +141,14 @@ public class TBPayload {
                             AMRSTbScreening at = amrsTbScreeningEncounters.get(x);
                             at.setResponseCode(String.valueOf(rescode));
                             at.setResponseCode("201");
+                            System.out.println("Imefika Hapa na data " + rescode);
+                            amrsTbScreeningService.save(at);
+                        }
+                    }else{
+                        for (int x = 0; x < amrsTbScreeningEncounters.size(); x++) {
+                            AMRSTbScreening at = amrsTbScreeningEncounters.get(x);
+                            at.setResponseCode(String.valueOf(rescode));
+                            at.setResponseCode("400");
                             System.out.println("Imefika Hapa na data " + rescode);
                             amrsTbScreeningService.save(at);
                         }

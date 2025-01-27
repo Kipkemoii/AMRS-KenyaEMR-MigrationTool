@@ -859,7 +859,7 @@ public static void defaulterTracing(AMRSDefaulterTracingService amrsDefaulterTra
     }
 }
 
-public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws JSONException, IOException, SQLException {
+public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTranslater, String KenyaEMRlocationUuid, String url, String auth) throws JSONException, IOException, SQLException {
     List<AMRSOvc> amrsOvcs = amrsOvcService.findByResponseCodeIsNull();
 
     if (!amrsOvcs.isEmpty()) {
@@ -894,6 +894,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                 jsonObservationD.put("person", kenyaemrPatientUuid);
                 jsonObservationD.put("concept", amrsOvcList.get(0).getKenyaEmrConceptUuid());
                 jsonObservationD.put("value", amrsOvcList.get(0).getKenyaEmrValue());
+                jsonObservationD.put("location", KenyaEMRlocationUuid);
                 jsonObservationD.put("obsDatetime", amrsOvcList.get(0).getObsDateTime());
                 if (!Objects.equals(amrsOvcList.get(0).getKenyaEmrValue(), "") && !Objects.equals(amrsOvcList.get(0).getKenyaEmrConceptUuid(), "")) {
                     jsonObservations.put(jsonObservationD);
@@ -910,7 +911,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                 jsonEncounter.put("visit", kenyaemrVisitUuid);
                 jsonEncounter.put("encounterDatetime", obsDatetime);
                 jsonEncounter.put("encounterType", "5cf00d9e-09da-11ea-8d71-362b9e155667");
-                jsonEncounter.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonEncounter.put("location", KenyaEMRlocationUuid);
             }
 
 
@@ -943,6 +944,10 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                         amrsOvcService.save(amrsOvc);
                     }
                 } else {
+                    for (AMRSOvc amrsOvc : amrsOvcList) {
+                        amrsOvc.setResponseCode("400");
+                        amrsOvcService.save(amrsOvc);
+                    }
                     System.err.println("Failed to process visit ID: " + visitId + " | Status Code: " + responseCode);
                 }
             } catch (Exception e) {
@@ -952,7 +957,8 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
 
     }
 }
-    public static void prepInitial(AMRSPrepInitialService amrsPrepInitialService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws JSONException, IOException, SQLException {
+    public static void prepInitial(AMRSPrepInitialService amrsPrepInitialService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String KenyaEMRlocationUuid,String url, String auth) throws JSONException, IOException, SQLException {
+
         List<AMRSPrepInitial> amrsPrepInitials = amrsPrepInitialService.findByResponseCodeIsNull();
 
         if (!amrsPrepInitials.isEmpty()) {
@@ -981,8 +987,8 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
 
                 // Prepare JSON observations
                 for (int x = 0; x < amrsPrepInitialList.size(); x++) {
-                    kenyaemrPatientUuid = amrsPrepInitialList.get(x).getKenyaEmrPatientUuid();
-                    kenyaemrVisitUuid = amrsPrepInitialList.get(x).getKenyaEmrVisitUuid();
+                    kenyaemrPatientUuid = amrsTranslater.KenyaemrPatientUuid(amrsPrepInitialList.get(x).getPatientId());
+                    kenyaemrVisitUuid = amrsTranslater.kenyaemrVisitUuid(amrsPrepInitialList.get(x).getVisitId());
                     obsDatetime = amrsPrepInitialList.get(x).getObsDateTime();
 
                     JSONObject jsonObservationD = new JSONObject();
@@ -990,6 +996,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                     jsonObservationD.put("concept", amrsPrepInitialList.get(x).getKenyaEmrConceptUuid());
                     jsonObservationD.put("value", amrsPrepInitialList.get(x).getKenyaEmrValue());
                     jsonObservationD.put("obsDatetime", amrsPrepInitialList.get(x).getObsDateTime());
+                    jsonObservationD.put("location", KenyaEMRlocationUuid);
 
 
                     if (!Objects.equals(amrsPrepInitialList.get(x).getKenyaEmrValue(), "") && !Objects.equals(amrsPrepInitialList.get(x).getKenyaEmrConceptUuid(), "")) {
@@ -1013,7 +1020,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                 jsonEncounter.put("visit", kenyaemrVisitUuid);
                 jsonEncounter.put("encounterDatetime", obsDatetime);
                 jsonEncounter.put("encounterType", "706a8b12-c4ce-40e4-aec3-258b989bf6d3");
-                jsonEncounter.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonEncounter.put("location", KenyaEMRlocationUuid);
 
 
                 // Send API request
@@ -1044,6 +1051,10 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSPatientServices amrsPa
                             amrsPrepInitialService.save(amrsPrepInitial);
                         }
                     } else {
+                        for (AMRSPrepInitial amrsPrepInitial : amrsPrepInitialList) {
+                            amrsPrepInitial.setResponseCode("400");
+                            amrsPrepInitialService.save(amrsPrepInitial);
+                        }
                         System.err.println("Failed to process visit ID: " + visitId + " | Status Code: " + responseCode);
                     }
                 } catch (Exception e) {

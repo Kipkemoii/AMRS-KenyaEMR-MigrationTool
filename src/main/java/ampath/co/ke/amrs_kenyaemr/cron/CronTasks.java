@@ -379,7 +379,7 @@ public class CronTasks {
     });
   }
 
-  //@Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+  @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
   public void prepMonthlyRefill() throws JSONException, ParseException, SQLException, IOException {
     CompletableFuture.runAsync(() -> {
       try {
@@ -392,7 +392,7 @@ public class CronTasks {
     });
   }
 
- // @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+  @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
   public void processCovid() throws JSONException, ParseException, SQLException, IOException {
     CompletableFuture.runAsync(() -> {
       try {
@@ -405,7 +405,7 @@ public class CronTasks {
     });
   }
 
- // @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+ @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
   public void processAlcohol() throws JSONException, ParseException, SQLException, IOException {
     CompletableFuture.runAsync(() -> {
       try {
@@ -417,6 +417,7 @@ public class CronTasks {
       }
     });
   }
+
  // @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
   public void processMCHEnrollements() throws JSONException, ParseException, SQLException, IOException {
     CompletableFuture.runAsync(() -> {
@@ -430,7 +431,7 @@ public class CronTasks {
     });
   }
 
-    // @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+     @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
     public void processHeiOutcome() throws JSONException, ParseException, SQLException, IOException {
         CompletableFuture.runAsync(() -> {
             try {
@@ -443,7 +444,7 @@ public class CronTasks {
         });
     }
 
-     //@Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+     @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
     public void GBVScreening() throws JSONException, ParseException, SQLException, IOException {
          CompletableFuture.runAsync(() -> {
              try {
@@ -455,7 +456,7 @@ public class CronTasks {
              }
          });
     }
-  //@Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
+  @Scheduled(initialDelay = 0, fixedRate = 30 * 60 * 1000)
   public void processEac() throws JSONException, ParseException, SQLException, IOException {
     CompletableFuture.runAsync(() -> {
       try {

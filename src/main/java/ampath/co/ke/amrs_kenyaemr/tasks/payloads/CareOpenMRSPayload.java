@@ -1066,7 +1066,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
     }
 
 
-    public static void prepFollowUp(AMRSPrepFollowUpService amrsPrepFollowUpService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws JSONException, IOException, SQLException {
+    public static void prepFollowUp(AMRSPrepFollowUpService amrsPrepFollowUpService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String KenyaEMRlocationUuid, String url, String auth) throws JSONException, IOException, SQLException {
         List<AMRSPrepFollowUp> amrsPrepFollowUps = amrsPrepFollowUpService.findByResponseCodeIsNull();
 
         if (!amrsPrepFollowUps.isEmpty()) {
@@ -1103,6 +1103,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
                     jsonObservationD.put("concept", amrsPrepFollowUpList.get(x).getKenyaEmrConceptUuid());
                     jsonObservationD.put("value", amrsPrepFollowUpList.get(x).getKenyaEmrValue());
                     jsonObservationD.put("obsDatetime", amrsPrepFollowUpList.get(x).getObsDateTime());
+                    jsonObservationD.put("location", KenyaEMRlocationUuid);
                     if (!Objects.equals(amrsPrepFollowUpList.get(x).getKenyaEmrValue(), "") && !Objects.equals(amrsPrepFollowUpList.get(x).getKenyaEmrConceptUuid(), "")) {
                         // Convert JSON object to string to ensure uniqueness
                         String jsonString = jsonObservationD.toString();
@@ -1126,7 +1127,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
                 jsonEncounter.put("visit", kenyaemrVisitUuid);
                 jsonEncounter.put("encounterDatetime", obsDatetime);
                 jsonEncounter.put("encounterType", "c4a2be28-6673-4c36-b886-ea89b0a42116");
-                jsonEncounter.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                jsonEncounter.put("location", KenyaEMRlocationUuid);
 
 
                 // Send API request
@@ -1158,6 +1159,10 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
                             amrsPrepFollowUpService.save(amrsPrepFollowUp);
                         }
                     } else {
+                        for (AMRSPrepFollowUp amrsPrepFollowUp : amrsPrepFollowUpList) {
+                            amrsPrepFollowUp.setResponseCode("400");
+                            amrsPrepFollowUpService.save(amrsPrepFollowUp);
+                        }
                         System.err.println("Failed to process visit ID: " + visitId + " | Status Code: " + responseCode);
                     }
                 } catch (Exception e) {
@@ -1204,6 +1209,7 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
                     jsonObservationD.put("person", kenyaemrPatientUuid);
                     jsonObservationD.put("concept", amrsPrepMonthlyRefillList.get(x).getKenyaEmrConceptUuid());
                     jsonObservationD.put("value", amrsPrepMonthlyRefillList.get(x).getKenyaEmrValue());
+                    jsonObservationD.put("location", KenyaEMRlocationUuid);
                     jsonObservationD.put("obsDatetime", amrsPrepMonthlyRefillList.get(x).getObsDateTime());
 
                     if (!Objects.equals(amrsPrepMonthlyRefillList.get(0).getKenyaEmrValue(), "") && !Objects.equals(amrsPrepMonthlyRefillList.get(0).getKenyaEmrConceptUuid(), "")) {
@@ -1262,6 +1268,10 @@ public static void ovc(AMRSOvcService amrsOvcService, AMRSTranslater amrsTransla
                             amrsPrepMonthlyRefillService.save(amrsPrepMonthlyRefill);
                         }
                     } else {
+                        for (AMRSPrepMonthlyRefill amrsPrepMonthlyRefill : amrsPrepMonthlyRefillList) {
+                            amrsPrepMonthlyRefill.setResponseCode("400");
+                            amrsPrepMonthlyRefillService.save(amrsPrepMonthlyRefill);
+                        }
                         System.err.println("Failed to process visit ID: " + visitId + " | Status Code: " + responseCode);
                     }
                 } catch (Exception e) {

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class HeiOutcomePayload {
-    public static void processHeiOutcome(AMRSHeiOutcomeService amrsHeiOutcomeService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String url, String auth) throws JSONException, IOException {
+    public static void processHeiOutcome(AMRSHeiOutcomeService amrsHeiOutcomeService, AMRSPatientServices amrsPatientServices, AMRSTranslater amrsTranslater, String KenyaEMRlocationUuid, String url, String auth) throws JSONException, IOException {
         List<AMRSHeiOutcome> amrsHeiOutcomes = amrsHeiOutcomeService.findByResponseCodeIsNull();
         if (amrsHeiOutcomes.size() > 0) {
 // Use a Set to store unique encounter IDs
@@ -55,7 +55,7 @@ public class HeiOutcomePayload {
                     jsonObservation.put("concept", amrsHeiOutcomesEncounters.get(x).getKenyaEmrConceptUuid());
                     jsonObservation.put("obsDatetime", obsDatetime);
                     jsonObservation.put("value", value);
-                    jsonObservation.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                    jsonObservation.put("location", KenyaEMRlocationUuid);
 
                     patientuuid = amrsTranslater.KenyaemrPatientUuid(amrsHeiOutcomesEncounters.get(x).getPatientId());
                     formuuid = amrsHeiOutcomesEncounters.get(x).getKenyaemrFormUuid();
@@ -71,7 +71,7 @@ public class HeiOutcomePayload {
                     jsonEncounter.put("patient", patientuuid);
                     jsonEncounter.put("encounterDatetime", encounterDatetime);
                     jsonEncounter.put("encounterType", encounteruuid);
-                    jsonEncounter.put("location", "37f6bd8d-586a-4169-95fa-5781f987fe62");
+                    jsonEncounter.put("location", KenyaEMRlocationUuid);
                     jsonEncounter.put("visit", visituuid);
                     jsonEncounter.put("obs", jsonObservations);
                     System.out.println("Payload for is here " + jsonEncounter.toString());
@@ -99,6 +99,14 @@ public class HeiOutcomePayload {
                             AMRSHeiOutcome at = amrsHeiOutcomesEncounters.get(x);
                             at.setResponseCode(String.valueOf(rescode));
                             at.setResponseCode("201");
+                            System.out.println("Imefika Hapa na data " + rescode);
+                            amrsHeiOutcomeService.save(at);
+                        }
+                    }else{
+                        for (int x = 0; x < amrsHeiOutcomesEncounters.size(); x++) {
+                            AMRSHeiOutcome at = amrsHeiOutcomesEncounters.get(x);
+                            at.setResponseCode(String.valueOf(rescode));
+                            at.setResponseCode("400");
                             System.out.println("Imefika Hapa na data " + rescode);
                             amrsHeiOutcomeService.save(at);
                         }

@@ -231,6 +231,7 @@ public class MigrateRegistration {
     //Patients
     public static void patients(String server, String username, String password, String locations, String parentUUID, AMRSPatientServices amrsPatientServices, AMRSIdentifiersService amrsIdentifiersService, AMRSPersonAtrributesService amrsPersonAtrributesService,Boolean samplePatients,String kenyaemrLocationUuid, String url, String auth) throws SQLException, JSONException, ParseException, IOException {
 
+        RegisterOpenMRSPayload.patient(amrsPatientServices, amrsIdentifiersService, amrsPersonAtrributesService,kenyaemrLocationUuid, url, auth);
 
         List<AMRSPatients> patientsListt = amrsPatientServices.findFirstByOrderByIdDesc();
         String sql = "";
